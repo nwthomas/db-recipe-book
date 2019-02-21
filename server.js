@@ -14,7 +14,7 @@ server.get("/", (req, res) => {
   res.send("Working!");
 });
 
-// ================================================== Dishces
+// ================================================== Dishes
 server.get("/api/dishes", async (req, res) => {
   try {
     const dishes = await db("dishes");
@@ -36,8 +36,9 @@ server.get("/api/dishes", async (req, res) => {
 server.get("/api/dishes/:id", async (req, res) => {
   try {
     const dish = await db("dishes").where({ id: req.params.id });
+    const recipes = await db("recipes").where({ dish_id: req.params.id });
     if (dish) {
-      res.status(200).json(dish);
+      res.status(200).json({ dish, recipes });
     } else {
       res
         .status(404)
@@ -75,4 +76,34 @@ server.post("/api/dishes", async (req, res) => {
   }
 });
 
+// ================================================== Recipes
+server.use("/api/recipes", async (req, res) => {
+  try {
+    const recipes = await db("recipes")
+      .join("dishes", "dishes.id", "=", "recipes.dish_id")
+      .select(
+        "recipes.id",
+        "recipes.name",
+        "recipes.created_at",
+        "recipes.updated_at",
+        "dishes.id as dish_id",
+        "dishes.name as dish_name"
+      );
+    if (recipes) {
+      res.status(200).json({
+        message: "Recipes retrieved from the database successfully.",
+        recipes
+      });
+    } else {
+      res
+        .status(404)
+        .json({ message: "No recipes could be found in the database." });
+    }
+  } catch (error) {
+    res.status(500).json({
+      message: "Error retrieving the recipes from the database.",
+      error
+    });
+  }
+});
 module.exports = server;
