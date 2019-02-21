@@ -25,7 +25,6 @@ exports.seed = function(knex, Promise) {
         { name: "Rice" },
         { name: "Tuna" },
         { name: "Shredded Cheese" },
-        { name: "Lentils" },
         { name: "Taco Shells" },
         { name: "Hot Sauce" }
       ]);
