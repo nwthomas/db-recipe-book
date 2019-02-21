@@ -77,13 +77,14 @@ server.post("/api/dishes", async (req, res) => {
 });
 
 // ================================================== Recipes
-server.use("/api/recipes", async (req, res) => {
+server.get("/api/recipes", async (req, res) => {
   try {
     const recipes = await db("recipes")
       .join("dishes", "dishes.id", "=", "recipes.dish_id")
       .select(
         "recipes.id",
         "recipes.name",
+        "recipes.instructions",
         "recipes.created_at",
         "recipes.updated_at",
         "dishes.id as dish_id",
@@ -106,4 +107,28 @@ server.use("/api/recipes", async (req, res) => {
     });
   }
 });
+
+server.post("/api/recipes", async (req, res) => {
+  if (!req.body.name || !req.body.dish_id || !req.body.instructions) {
+    return res.status(400).json({
+      message:
+        "Please include a recipe name, dish, and instructions and try again."
+    });
+  }
+  try {
+    const recipe = await db("recipes").insert(req.body);
+    if (recipe) {
+      res.status(200).json({ message: "Recipe created successfully.", recipe });
+    } else {
+      res
+        .status(404)
+        .json({ message: "The recipe could not be created at this time." });
+    }
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Error creating the recipe in the database." });
+  }
+});
+
 module.exports = server;
