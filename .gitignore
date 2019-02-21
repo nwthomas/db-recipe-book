@@ -1,3 +1,6 @@
+# General files and directories
+table-models/
+
 # Logs
 logs
 *.log
